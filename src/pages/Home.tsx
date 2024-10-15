@@ -1,8 +1,25 @@
-import React from 'react'
+import Navbar from "../components/Navbar"
+import PostCard from "../components/PostCard"
+import { useAppSelector } from "../redux/hooks/hooks"
+import Publish from "./Publish"
 
 const Home = () => {
+
+  const user = useAppSelector(store => store.userReducer)
+  console.log(user)
+  console.log(document.cookie)
+  
   return (
-    <div>Home</div>
+    <>
+      <Navbar/>
+      <PostCard/>
+      <PostCard/>
+      <PostCard/>
+      <PostCard/>
+      <PostCard/>
+      <PostCard/>
+    </>
+    
   )
 }
 

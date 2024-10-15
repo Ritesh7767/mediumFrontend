@@ -1,6 +1,6 @@
 const LandingFooter = () => {
     return (
-    <div className='border border-black'>
+    <div className='border border-black h-[8vh]'>
         <ul className='hidden sm:flex justify-center p-4 gap-4 text-sm text-gray-700'>
             <li>Help</li>
             <li>Status</li>
