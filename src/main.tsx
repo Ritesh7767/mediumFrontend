@@ -6,13 +6,16 @@ import LoginProvider from './context/LoginProvider.tsx'
 import { EmailProvider } from './context/EmailProvider.tsx'
 import { Provider } from 'react-redux'
 import store from './redux/store/store.ts'
+import PublishProvider from './context/PublishProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <Provider store={store}>
       <LoginProvider>
         <EmailProvider>
-          <App />
+          <PublishProvider>
+            <App />
+          </PublishProvider>
         </EmailProvider>
       </LoginProvider>
     </Provider>

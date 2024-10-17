@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '../redux/hooks/hooks'
 import { SETUSER } from '../redux/slices/user.slice'
 
-interface errorInterface {
+export interface errorInterface {
     error: boolean, 
     message: string
 }
@@ -49,10 +49,12 @@ const Form = () => {
             }
 
             const response = await axios.post(`${server}/user/${emailContext?.email.authThrough}`, body)
+            localStorage.setItem("accessToken", response.data.data.accessToken)
+            localStorage.setItem("refreshToken", response.data.data.refreshToken)
+            
             dispatch(SETUSER(response.data.data))
-            console.log(response)
-
             navigate("/home", {replace: true})
+
         } catch (error: unknown) {
 
             if (axios.isAxiosError(error)) setError({error: true, message: `${error.response?.data.message}`})

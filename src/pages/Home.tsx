@@ -6,8 +6,8 @@ import Publish from "./Publish"
 const Home = () => {
 
   const user = useAppSelector(store => store.userReducer)
-  console.log(user)
-  console.log(document.cookie)
+  // console.log(user)
+  // console.log(document.cookie)
   
   return (
     <>

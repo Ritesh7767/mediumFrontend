@@ -1,9 +1,11 @@
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useContext } from "react"
 import StoryNav from "../components/StoryNav"
 import axios from "axios"
 import { server } from "../config/config"
 import Publish from "./Publish"
-import { useAppDispatch } from "../redux/hooks/hooks"
+import { useAppDispatch, useAppSelector } from "../redux/hooks/hooks"
+import { SETDRAFT} from "../redux/slices/draft.slice"
+import { PublishContext, PublishContextInterface } from "../context/PublishProvider"
 
 export interface postInterface {
     title: string,
@@ -13,8 +15,8 @@ export interface postInterface {
 
 export interface statusInterface {
     uploaded: boolean
-    status: "Saving" | "Failed" | "Saved",
-    id: string
+    status: "Saving..." | "Failed" | "Saved",
+    id: string | undefined
 }
 
 const Write = () => {
@@ -24,14 +26,19 @@ const Write = () => {
         content: "",
         image: "",
     })
-    
-    const [previewImage, setPreviewImage] = useState<any>()
-    const [status, setStatus] = useState<statusInterface>()
+
+    const draft = useAppSelector(store => store.draftReducer)
+    const [status, setStatus] = useState<statusInterface>({
+        uploaded: false,
+        status: "Saved",
+        id: undefined
+    })
     const first = useRef(true)
     let id = useRef<any>()
     const dispatch = useAppDispatch()
-    
-    axios.defaults.withCredentials = true
+
+    const publish = useContext<PublishContextInterface | undefined>(PublishContext)
+
     useEffect(() => {
         !first.current && (
             async () => {
@@ -43,12 +50,13 @@ const Write = () => {
                         formData.append("content", post.content)
                         formData.append("image", post.image)
 
-                        setStatus((prev: any) => ({...prev, status: "Saving"}))
+                        setStatus((prev: any) => ({...prev, status: "Saving..."}))
                         let response
                         if (status?.uploaded) {
-                            response = axios.patch(`${server}/post?id=${status.id}`, formData, {
+                            response = await axios.patch(`${server}/post?id=${status.id}`, formData, {
                                 headers: {
                                     "Content-Type": "multipart/form-data",
+                                    "authorization": `Bearer ${localStorage.getItem("accessToken")}`
                                 },
                                 withCredentials: true,
                             })
@@ -58,14 +66,16 @@ const Write = () => {
                             response = await axios.post(`${server}/post`, formData, {
                                 headers: {
                                     "Content-Type": "multipart/form-data",
+                                    "authorization": `Bearer ${localStorage.getItem("accessToken")}`
                                 },
                                 withCredentials: true
                             })
                             setStatus({uploaded: true, status: "Saved", id: response.data.data.id})
                         }
                         console.log(response)
+                        dispatch(SETDRAFT(response?.data.data))
                     } catch (error) {
-                        setStatus((prev: any) => ({status: prev.status, uploaded: prev.uploaded, id: prev.id}))
+                        setStatus((prev: any) => ({status: "Failed", uploaded: prev.uploaded, id: prev.id}))
                     }
                 }, 1000)
             }
@@ -84,25 +94,22 @@ const Write = () => {
         if (file) {
             const reader = new FileReader()
             reader.onloadend = () => {
-                setPost(prev => ({...prev, "imageUrl": reader.result}))
-                setPreviewImage(reader.result)
+                dispatch(SETDRAFT({imageUrl :reader.result}))
             }
             reader.readAsDataURL(file)
         }
     }
 
-    console.log(document.cookie)
-    
   return (
     <div className="relative md:w-5/6 m-auto">
-        <StoryNav id={status?.id}/>    
+        <StoryNav status={status}/>    
         <div className="p-7  m-auto">
             <input onChange={handler} value={post.title} name="title" type="text" placeholder="Title" className="mb-1 h-16 p-2 text-3xl outline-none w-full" /><br />
             {!post.image && <button onClick={() => document.getElementById("fileInput")?.click()} >Uplaod Image</button>}
             <input className="hidden" id="fileInput" type="file" name="image" onChange={handleImageChange} />
             {post.image && <div className="relative">
 
-                <img src={previewImage} onMouseOver={() => {
+                <img src={draft.imageUrl} onMouseOver={() => {
                     const changeImageElement = document.getElementById("changeImage")
                     if (changeImageElement){
                         changeImageElement.style.display = "flex"
@@ -124,7 +131,7 @@ const Write = () => {
             }
             <textarea onChange={handler} value={post.content} name="content" id="" placeholder="Tell your story..." className="w-full text-xl p-2 h-screen outline-none resize-none"></textarea>
         </div>
-        {/* <Publish/> */}
+        {publish?.publish && <Publish/>}
     </div>
 
   )

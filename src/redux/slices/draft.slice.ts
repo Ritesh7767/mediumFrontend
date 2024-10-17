@@ -3,15 +3,23 @@ import { createSlice } from "@reduxjs/toolkit"
 export interface draftInterface {
     id: string
     title: string,
+    date: Date | undefined,
+    published: boolean,
+    userId: string,
     content: string
     image: string,
+    imageUrl: string,
     subtitle: string,
     topic: string
 }
 
-const initialState: draftInterface = {
+export const initialDraftState: draftInterface = {
     id: "",
     image: "",
+    date: undefined,
+    published: false,
+    userId: "",
+    imageUrl: "",
     title: "",
     subtitle: "",
     content: "",
@@ -20,10 +28,10 @@ const initialState: draftInterface = {
 
 const draftSlice = createSlice({
     name: "draft",
-    initialState,
+    initialState: initialDraftState,
     reducers: {
         SETDRAFT (state, action) {
-            return action.payload
+            return {...state, ...action.payload}
         }
     }
 })
