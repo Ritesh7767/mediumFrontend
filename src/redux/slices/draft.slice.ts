@@ -8,7 +8,7 @@ export interface draftInterface {
     userId: string,
     content: string
     image: string,
-    imageUrl: string,
+    imageUrl?: string,
     subtitle: string,
     topic: string
 }

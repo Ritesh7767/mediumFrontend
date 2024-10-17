@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks/hooks"
 import { SETDRAFT} from "../redux/slices/draft.slice"
 import { PublishContext, PublishContextInterface } from "../context/PublishProvider"
 
-export interface postInterface {
+interface postInterface {
     title: string,
     content: string,
     image: string, 
